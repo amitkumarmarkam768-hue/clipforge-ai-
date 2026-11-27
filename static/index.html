@@ -1,0 +1,36 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#090b13"><title>ClipForge AI</title>
+<style>
+:root{color-scheme:dark;--bg:#090b13;--panel:#141927;--line:#293247;--muted:#9ba8bf;--accent:#9a7bff;--cyan:#55d6d0}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 85% 0%,#25204a 0,transparent 38%),var(--bg);color:#f5f6ff;font:15px system-ui,-apple-system,Segoe UI,sans-serif}
+main{max-width:760px;margin:auto;padding:24px 16px 60px}.brand{display:flex;align-items:center;gap:12px;margin:10px 0 30px}.logo{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#9a7bff,#4bcbcf);display:grid;place-items:center;font-size:22px;font-weight:900;color:#080a12}.brand strong{font-size:20px}.brand small{display:block;color:var(--muted);font-size:12px}.hero h1{font-size:clamp(32px,8vw,48px);line-height:1.05;margin:0 0 12px}.gradient{background:linear-gradient(90deg,#b7a4ff,#6ee4dc);color:transparent;background-clip:text}.hero p{color:var(--muted);line-height:1.55}.card{background:rgba(20,25,39,.94);border:1px solid var(--line);border-radius:20px;padding:18px;margin:16px 0}.label{font-size:13px;font-weight:700;margin:0 0 9px;display:block}.input{width:100%;background:#0b101c;border:1px solid #34405a;border-radius:12px;color:white;padding:14px;font-size:14px;outline:none}.input:focus{border-color:var(--accent)}.hint{font-size:12px;color:var(--muted);line-height:1.5;margin:8px 0}.upload{display:block;border:1px dashed #596581;border-radius:14px;padding:20px;text-align:center;background:#0d1321}.upload input{max-width:100%;margin-top:12px;color:var(--muted)}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}.btn{width:100%;border:0;border-radius:13px;padding:15px;font-size:15px;font-weight:800;background:linear-gradient(100deg,#a28aff,#5bd8d2);color:#090b13;margin-top:16px}.btn:disabled{opacity:.55}.status{color:var(--cyan);font-size:13px;margin-top:12px;white-space:pre-wrap}.clips{display:grid;gap:12px}.clip{border:1px solid var(--line);border-radius:14px;padding:12px;background:#0c1220}.clip video{width:100%;max-height:420px;background:#000;border-radius:10px}.clip a{display:inline-block;margin-top:10px;color:#bbaaff;font-weight:700;text-decoration:none}.notice{font-size:12px;color:#c4cce0;background:#242034;border:1px solid #4a416e;padding:12px;border-radius:12px;line-height:1.5}.tabs{display:flex;gap:8px;margin-bottom:14px}.tab{flex:1;border:1px solid var(--line);background:#0c1220;color:#c9cce0;padding:11px;border-radius:11px}.tab.active{background:#30284e;border-color:#8970dd;color:white}.check{display:flex;gap:10px;align-items:flex-start;margin-top:15px;font-size:12px;color:#c4cce0;line-height:1.4}.check input{margin-top:2px}
+</style></head><body><main>
+<div class="brand"><div class="logo">▶</div><div><strong>ClipForge AI</strong><small>Automatic short-video maker</small></div></div>
+<section class="hero"><h1>Long video in.<br><span class="gradient">Great clips out.</span></h1><p>Give ClipForge a direct video link or upload a video file. AI finds candidate highlights and creates vertical clips for Shorts and Reels.</p></section>
+<div class="card">
+<div class="tabs"><button class="tab active" id="linkTab">Video link</button><button class="tab" id="uploadTab">Upload file</button></div>
+<section id="linkPane"><label class="label" for="url">Direct video URL</label><input class="input" id="url" type="url" placeholder="https://example.com/video.mp4"><p class="hint">Use a direct public MP4, MOV or WEBM file URL. A normal YouTube watch link cannot be downloaded by this starter website.</p></section>
+<section id="uploadPane" hidden><label class="label">Choose video from your device</label><label class="upload"><strong>Select a video</strong><br><span class="hint">MP4, MOV, MKV, WEBM · max 750 MB</span><input id="video" type="file" accept="video/*"></label></section>
+<div class="grid"><div><label class="label" for="count">Number of clips</label><select class="input" id="count"><option>3</option><option selected>5</option><option>8</option><option>10</option></select></div><div><label class="label" for="length">Clip length</label><select class="input" id="length"><option value="30">30 seconds</option><option value="45" selected>45 seconds</option><option value="60">60 seconds</option></select></div></div>
+<label class="check"><input type="checkbox" id="rights"><span>I own this video or have permission to download, edit and create clips from it.</span></label>
+<button class="btn" id="go">✦ Generate clips automatically</button><div class="status" id="status" role="status"></div></div>
+<div class="notice">YouTube note: ordinary YouTube links are not direct video files. For videos on your own channel, a separate authorized YouTube OAuth integration is needed. This app does not bypass private, age, DRM or access restrictions. The website must be deployed to a server with Python, FFmpeg and enough memory for AI processing.</div>
+<section id="results" style="display:none"><h2>Your clips</h2><div class="clips" id="clips"></div></section>
+</main><script>
+let mode='link';const $=id=>document.getElementById(id),statusEl=$('status');
+$('linkTab').onclick=()=>{mode='link';$('linkTab').classList.add('active');$('uploadTab').classList.remove('active');$('linkPane').hidden=false;$('uploadPane').hidden=true};
+$('uploadTab').onclick=()=>{mode='upload';$('uploadTab').classList.add('active');$('linkTab').classList.remove('active');$('linkPane').hidden=true;$('uploadPane').hidden=false};
+$('go').onclick=async()=>{
+ if(!$('rights').checked){statusEl.textContent='Please confirm that you have permission to use this video.';return}
+ const fd=new FormData();fd.append('clip_count',$('count').value);fd.append('clip_seconds',$('length').value);fd.append('rights_confirmed','true');
+ let endpoint;
+ if(mode==='link'){const url=$('url').value.trim();if(!url){statusEl.textContent='Paste a direct video URL first.';return}fd.append('url',url);endpoint='/api/create-from-link'}
+ else{const f=$('video').files[0];if(!f){statusEl.textContent='Choose a video file first.';return}fd.append('video',f);endpoint='/api/create-clips'}
+ $('go').disabled=true;statusEl.textContent='Accessing video and analyzing it. This can take a while…';
+ try{const r=await fetch(endpoint,{method:'POST',body:fd});const data=await r.json();if(!r.ok)throw Error(data.detail||'Processing failed');
+ $('clips').innerHTML='';data.clips.forEach(c=>{const el=document.createElement('article');el.className='clip';const title=document.createElement('strong');title.textContent=`${c.name} · ${c.start}s–${c.end}s`;const v=document.createElement('video');v.controls=true;v.src=c.preview;const p=document.createElement('p');p.className='hint';p.textContent=c.transcript||'Automatically selected segment';const a=document.createElement('a');a.href=c.download;a.textContent='Download MP4';a.download='';el.append(title,v,p,a);$('clips').append(el)});
+ $('results').style.display='block';statusEl.textContent='Done. Review your clips before publishing.';
+ }catch(e){statusEl.textContent='Error: '+e.message}finally{$('go').disabled=false}
+};
+</script></body></html>
